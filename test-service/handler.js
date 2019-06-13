@@ -7,30 +7,20 @@ module.exports.publisher = async (event) => {
 
   SNS.publish(
     {
-      Message: 'Triggeerrrr!',
+      Message: JSON.stringify({
+        name: event.name,
+        email: event.email
+      }),
       TopicArn: 'arn:aws:sns:us-east-1:044552001992:test-sns-topic',
-      name: event.name,
-      email: event.email,
-      MessageAttributes: {
-        Test: {
-          Type: 'String',
-          Value: 'TestString'
-        },
-        TestBinary: {
-          Type: "Binary",
-          Value: "TestBinary"
-        }
-      }
     }, (err, data) => {
-      console.log('SNS ERROR!', err);
-      console.log('SNS TRIGGERED', data);
+      console.log( err ? `SNS ERROR! ${err}` : `SNS TRIGGERED! ${data}`);
     }
   )
 
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: 'Go Serverless v1.0! Your function executed successfully!',
+      message: 'Publisher',
       input: event,
     }, null, 2),
   };
@@ -40,26 +30,33 @@ module.exports.createAcc = (event) => {
   const Account = dynogels.define('monday-2', {
     hashKey : 'email',
    
-    timestamps : true,
+    timestamps: true,
    
     schema : {
-      email   : Joi.string().email(),
-      name    : Joi.string(),
+      email: Joi.string().email(),
+      name: Joi.string(),
     }
   });
   
+  const { email, name } = JSON.parse(event.Records[0].Sns.Message);
+  console.log(`MAIL = ${email}, NAME = ${name}`);
+
   Account.create(
-    {email: event.Records[0].Sns.email, name: event.Records[0].Sns.name}, 
-    {overwrite : false}, 
+    {
+      email,
+      name
+    }, 
+    {
+      overwrite: false
+    }, 
     (err, acc) => {
-      console.log("&&&&&&&&&&&", err);
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!", acc);
+      console.log( err ? `Account create false. ${err}` : `Account create successful! ${acc}`);
     });
 
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: 'Event!',
+      message: 'createAcc',
       input: event,
     }, null, 2),
   };
