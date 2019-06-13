@@ -18,6 +18,12 @@ functions:
       - http:
           path: users/create
           method: get
+  addAcc:
+    handler: handler.addAcc
+    events:
+      - http:
+          path: users/create
+          method: get
 custom:
   webpack:
     webpackConfig: 'webpack.config.js'
