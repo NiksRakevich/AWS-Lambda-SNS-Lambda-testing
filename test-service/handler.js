@@ -11,7 +11,14 @@ module.exports.publisher = async (event) => {
         name: event.name,
         email: event.email
       }),
+      MessageAttributes: {
+        someKey: {
+          DataType: 'String',
+          StringValue: event.someKey
+        }
+     },
       TopicArn: 'arn:aws:sns:us-east-1:044552001992:test-sns-topic',
+      
     }, (err, data) => {
       console.log( err ? `SNS ERROR! ${err}` : `SNS TRIGGERED! ${data}`);
     }
